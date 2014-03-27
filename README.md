@@ -1,6 +1,7 @@
 # petalJS
 
-Version 0.0.1
+Version 0.1.0
+
 A JavaScript framework for web development
 
 ## State Machine
@@ -26,4 +27,36 @@ Examples for how to use the state machine:
 
 - Modal Dialog: /sampels/modal-dialog.html
 
+## Router
+
+`$petal.router` An instance to route the URL for web application with single page.
+
+The router will split `window.location.hash` into two parts. One starts with '#' and the other is for query which begin with '?'. The fomer part will be tested by the rules registered in the router, load necessary JavaScript resources and invoke an initial function.
+
+```
+url   = #(hash);
+query = ?(hash);
+
+foreach rule in router.rules
+   rule.patern.test(url);
+   if pass
+      load(rule.jses);
+      rule.init();
+      return;
+```
+
+- `loadjs` Load a JavaScript resource `js` and then invoke `callback`; if `force` is true and the specified JavaScript resource is loaded, it will make the resource reloaded.
+- `loadjses` Load several JavaScript resources in an array of `js` and then invoke `callback'.
+- `unloadjs` Unload a specified JavaScript resource `js` and then invoke `clean`.
+- `ruleIn` Register a rule with `name` as ID, `patern`, an array `js` to declare what JavaScript resources needed and a function `init`.
+- `ruleOut` Remove a rule by `name`.
+- `refresh` Do routing once; attach to `window` to monitor URL changes as below:
+
+```js
+window.onhashchange = $petal.router.refresh;
+```
+
+Examples for how to use the router:
+
+- Router: /sampels/router.html (+ /samples/router-extra.js)
 

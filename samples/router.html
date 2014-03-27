@@ -1,0 +1,36 @@
+<html>
+<head><title>Router</title></head>
+<body>
+<div id='result'></div>
+<script type='text/javascript' src='../petal-router.js'></script>
+<script type='text/javascript'>
+(function($petal, $win, $doc) {
+   $petal.router.ruleIn('homepage', '^#?/?$', null,
+      function(url, query) {
+         $win.location.hash = '#/home/?hello';
+   });
+   $petal.router.ruleIn('homepage', '^#/home/', null,
+      function(url, query) {
+         var html = '';
+         html = 'Try a link to show a number:'
+              + '<a href="#/1234567890/">1234567890</a><br />'
+              + 'Try a link to show a WORD:'
+              + '<a href="#/ROUTER/">ROUTER</a><br />'
+              + 'Homepage says: "'+query+'"';
+         $doc.getElementById('result').innerHTML = html;
+   });
+   $petal.router.ruleIn('number', '^#/([0-9]+)/', null,
+      function(url, id, query) {
+         $doc.getElementById('result').innerHTML = id;
+   });
+   $petal.router.ruleIn('WORD', '^#/([A-Z]+)/',
+      ['router-extra.js'],
+      function(url, word, query) {
+         $doc.getElementById('result').innerHTML = lower(word);
+   });
+   $win.onhashchange = $petal.router.refresh;
+   $petal.router.refresh();
+})($petal, window, document);
+</script>
+</body>
+</html>
