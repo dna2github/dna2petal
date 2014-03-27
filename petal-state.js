@@ -222,24 +222,3 @@ $petal.state.PetalMachine = PetalMachine;
 
 })($petal); // END: Module $petal.state
 
-
-/*
-   var m = new $petal.state.PetalMachine();
-   m.register("1", function() {alert("in:p1");}, function() {alert("out:p1");});
-   m.register("2", function() {alert("in:p2");}, function() {alert("out:p2");});
-   m.register("3", function() {alert("in:p3");}, function() {alert("out:p3");});
-   m.register("4", function() {alert("in:p4");}, function() {alert("out:p4");});
-
-   m.connect("1", "2", null);
-   m.connect("1", "3", null);
-   m.connect("2", "2", null);
-   m.connect("2", "4", null);
-   m.connect("3", "1", null);
-   m.connect("3", "4", null);
-   m.connect("4", "1", null);
-
-   m.initialize("1");
-   m.transfer("4"); // no effect, stay at "1"
-   m.transfer("3"); // goto "3"
-   var i;for(i=0;i<10;i++) m.wander();
-*/

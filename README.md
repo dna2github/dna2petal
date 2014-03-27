@@ -25,6 +25,29 @@ result = B.event_in (A, extraData, remain);
 
 Examples for how to use the state machine:
 
+- Fast try:
+
+```js
+var m = new $petal.state.PetalMachine();
+m.register("1", function() {alert("in:p1");}, function() {alert("out:p1");});
+m.register("2", function() {alert("in:p2");}, function() {alert("out:p2");});
+m.register("3", function() {alert("in:p3");}, function() {alert("out:p3");});
+m.register("4", function() {alert("in:p4");}, function() {alert("out:p4");});
+
+m.connect("1", "2", null);
+m.connect("1", "3", null);
+m.connect("2", "2", null);
+m.connect("2", "4", null);
+m.connect("3", "1", null);
+m.connect("3", "4", null);
+m.connect("4", "1", null);
+
+m.initialize("1");
+m.transfer("4"); // no effect, stay at "1"
+m.transfer("3"); // goto "3"
+var i;for(i=0;i<10;i++) m.wander();
+```
+
 - Modal Dialog: /sampels/modal-dialog.html
 
 ## Router
@@ -57,6 +80,30 @@ window.onhashchange = $petal.router.refresh;
 ```
 
 Examples for how to use the router:
+
+- Fast try:
+
+```js
+$petal.router.ruleIn('home', '^#?/?$', null,
+   function() {
+      // redirect to real home
+      window.location.hash = '/home';
+   });
+$petal.router.ruleIn('home', '^#/home$', null,
+   function() {
+      alert('hello world!');
+   });
+$petal.router.ruleIn('number', '^#/number/([0-9]+)$', null,
+   function(url, num) {
+      alert(num);
+   });
+$petal.router.ruleIn('word', '^#/word/([A-Za-z]+])$' null,
+   function(url, word, query) { // e.g. #/word/hello?world
+      alert(word+'\n'+query);
+   });
+window.onhashchange = $petal.router.refresh;
+$petal.router.refresh();
+```
 
 - Router: /sampels/router.html (+ /samples/router-extra.js)
 

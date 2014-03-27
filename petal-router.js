@@ -64,10 +64,12 @@ PetalRouter.prototype.loadjs = function(js, callback, force) {
          if(callback) callback();
       };
       $doc.body.appendChild(m.act);
+      return true;
    } else if(force) {
       this.unloadjs(js);
-      this.loadjs(js);
+      return this.loadjs(js);
    }
+   return false;
 };
 PetalRouter.prototype.unloadjs = function(js, clean) {
    var m,index = _indexOf(loadedJS, 'name', js);
@@ -87,8 +89,13 @@ PetalRouter.prototype.loadjses = function(js, callback, force) {
       if(nextjs == null || i>=n) {
          if(callback) callback();
       } else {
-         self.loadjs(nextjs, seq, force);
+         var load = false;
+         load = self.loadjs(nextjs, seq, force);
          nextjs = js[++i];
+         if(!load) {
+            // loaded
+            seq();
+         }
       }
    }
    seq();
