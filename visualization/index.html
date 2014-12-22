@@ -1,17 +1,22 @@
 <html>
 <head><title>Visualization Lab</title></head>
 <body>
-<script type="text/javascript" src="interactions.js"></script>
+<div id="test" style="width:100%;height:100%;background-color:yellow;"></div>
+<script type="text/javascript" src="modules.js"></script>
 <script type="text/javascript">
-var interactions = PetalInteraction({
-  mousehold: function(target, pos) {
-    console.log('[MouseHold]');
-  },
-  comboclick: function(target, pos) {
-    console.log('[MouseCombo] ' + pos.length);
-  }
+var test = document.querySelector('#test');
+var modules = PetalModule();
+modules.load('interactions.js', false, function () {
+  var interactions = PetalInteraction({
+    mousehold: function(target, pos) {
+      console.log('[MouseHold]');
+    },
+    comboclick: function(target, pos) {
+      console.log('[MouseCombo] ' + pos.length);
+    }
+  });
+  interactions.bind(test);
 });
-interactions.bind(document.body);
 </script>
 </body>
 </html>

@@ -1,5 +1,8 @@
 Visualization Module
 
+Module
+- dynamically load javascript file
+
 Interaction
 - unify mobile touch and computer mouse event
 - simulate event: combo click and mouse hold
