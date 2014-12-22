@@ -1,0 +1,8 @@
+Visualization Module
+
+Interaction
+- unify mobile touch and computer mouse event
+- simulate event: combo click and mouse hold
+- PetalInteraction(callback) =>
+    callback.comboclick => function
+    callback.mousehold  => function

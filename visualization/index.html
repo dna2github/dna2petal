@@ -1,0 +1,17 @@
+<html>
+<head><title>Visualization Lab</title></head>
+<body>
+<script type="text/javascript" src="interactions.js"></script>
+<script type="text/javascript">
+var interactions = PetalInteraction({
+  mousehold: function(target, pos) {
+    console.log('[MouseHold]');
+  },
+  comboclick: function(target, pos) {
+    console.log('[MouseCombo] ' + pos.length);
+  }
+});
+interactions.bind(document.body);
+</script>
+</body>
+</html>
