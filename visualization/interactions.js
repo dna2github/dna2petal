@@ -1,9 +1,14 @@
 /*
  * @auther: Seven Lju
  * @date:   2014-12-22
- * Petal Interaction
+ * PetalInteraction
  *   callback : mouse event callback, e.g. {mousemove: function (target, positions, extra) { ... }}
- *              positions = [x, y] or [x, y, t] or [[x1, y1], [x2, y2], ...] or [[x1, y1, t1], [x2, y2, t2], ...]
+ *              mosueevent = click, dblclick, comboclick, mousemove, mousedown, mouseup, mousehold, mousegesture
+ *              positions = [x, y] or [x, y, t] or [[x1, y1], [x2, y2], ...] or
+ *                          [[x1, y1, t1], [x2, y2, t2], ...] or
+ *                          [[[x1, y1, t1], [x2, y2, t2], ...], [[x1, y1, t1], ...], ...]
+ *
+ * PetalMobileInteraction
  */
 function PetalInteraction(callback) {
 
@@ -23,6 +28,17 @@ function PetalInteraction(callback) {
       timingable: false /* count time for combo interval */,
       tolerance: -1     /* px, combo click (x,y) diff */,
       timeout: 200      /* ms, timeout to reset counting */
+    },
+    gesture: {
+      enable: true,
+      mode: 'relative'  /* absolute / relative */,
+      timeout: 500      /* ms, timeout to complete gesture */,
+      absolute: {
+        resolution: 20  /* px, split into N*N boxes */
+      },
+      relative: {
+        resolution: 20  /* px, mark new point over N px */
+      }
     }
   };
 
@@ -34,6 +50,7 @@ function PetalInteraction(callback) {
   function interaction_init() {
     state.hold = null;
     state.combo = null;
+    state.gesture = null;
 
     if (lock.checkHold !== null) clearTimeout(lock.checkHold);
     if (lock.checkCombo !== null) clearTimeout(lock.checkCombo);
@@ -41,6 +58,7 @@ function PetalInteraction(callback) {
     lock.mouseDown = false;
     lock.checkHold = null;
     lock.checkCombo = null;
+    lock.checkGesture = null;
   }
 
   function clone_mouse_event(e) {
@@ -76,8 +94,8 @@ function PetalInteraction(callback) {
       if (callback.comboclick) callback.comboclick(target, state.combo.positions);
     }
     lock.holdBeatCombo = false;
-    state.combo = null;
     lock.checkCombo = null;
+    state.combo = null;
   }
 
   function check_hold() {
@@ -85,7 +103,20 @@ function PetalInteraction(callback) {
       if (callback.mousehold) callback.mousehold(target, [state.hold.x, state.hold.y]);
       if (!config.combo.holdable) lock.holdBeatCombo = true;
     }
-   lock.checkHold = null;
+    lock.checkHold = null;
+    state.hold = null;
+  }
+
+  function check_gesture() {
+    var fullpath = state.gesture.fullpath;
+    if (fullpath.length) {
+      if (fullpath.length > 1 || fullpath[0].length > 1) {
+        if (callback.mousegesture) callback.mousegesture(target, fullpath);
+      }
+    }
+    fullpath = null;
+    lock.checkGesture = null;
+    state.gesture = null;
   }
 
   function do_combo_down(x, y) {
@@ -127,7 +158,7 @@ function PetalInteraction(callback) {
     // if mouse not down, skip
     if (!lock.mouseDown) return;
     if (checkMoved !== true) checkMoved = false;
-    if (checkMoved) {
+    if (checkMoved && state.hold) {
       // if move a distance and stop to hold
       if (!check_distance(state.hold.x, state.hold.y,
                           x, y, config.hold.tolerance)) {
@@ -142,24 +173,84 @@ function PetalInteraction(callback) {
     lock.checkHold = setTimeout(check_hold, config.hold.last);
   }
 
+  function do_gesture_start(x, y) {
+    if (lock.checkGesture !== null) clearTimeout(lock.checkGesture);
+    if (!state.gesture) state.gesture = {};
+    if (!state.gesture.fullpath) state.gesture.fullpath = [];
+    state.gesture.timestamp = new Date().getTime();
+    state.gesture.positions = [];
+    state.gesture.x = x;
+    state.gesture.y = y;
+  }
+
+  var _act_gesture_move_map_mode = {
+    absolute: do_gesture_absolute,
+    relative: do_gesture_relative
+  };
+  function do_gesture_move(x, y) {
+    if (!lock.mouseDown) return;
+    var point = _act_gesture_move_map_mode[config.gesture.mode](x, y);
+    var timestamp = new Date().getTime();
+    if (!point) return;
+    state.gesture.positions.push([
+      point[0], point[1],
+      timestamp - state.gesture.timestamp
+    ]);
+    state.gesture.x = point[0];
+    state.gesture.y = point[1];
+    state.gesture.timestamp = timestamp;
+    point = null;
+  }
+
+  function do_gesture_absolute(x, y) {
+    var resolution = config.gesture.absolute.resolution;
+    if (resolution < 1) resolution = 1;
+    if (Math.floor(x / resolution) === Math.floor(state.x /resolution) &&
+        Math.floor(y / resolution) === Math.floor(state.y /resolution)) {
+      return null;
+    }
+    return [x, y];
+  }
+
+  function do_gesture_relative(x, y) {
+    if (!check_distance(state.gesture.x, state.gesture.y, x, y,
+                        config.gesture.relative.resolution)) return null;
+    return [x, y];
+  }
+
+  function do_gesture_break(x, y) {
+    var timestamp = new Date().getTime();
+    state.gesture.positions.push([
+      state.gesture.x, state.gesture.y,
+      timestamp - state.gesture.timestamp
+    ]);
+    state.gesture.fullpath.push(state.gesture.positions);
+    state.gesture.positions = [];
+    state.gesture.timestamp = timestamp;
+    lock.checkGesture = setTimeout(check_gesture, config.gesture.timeout);
+  }
+
   function event_mousedown(e) {
     var x = e[config.axis.x], y = e[config.axis.y];
     lock.mouseDown = true;
     if (config.hold.enable) do_hold(x, y, false);
     if (config.combo.enable) do_combo_down(x, y);
+    if (config.gesture.enable) do_gesture_start(x, y);
     if (callback.mousedown) callback.mousedown(target, [x, y], clone_mouse_event(e));
   }
 
   function event_mousemove(e) {
     var x = e[config.axis.x], y = e[config.axis.y];
     if (config.hold.enable) do_hold(x, y, true);
+    if (config.gesture.enable) do_gesture_move(x, y);
     if (callback.mousemove) callback.mousemove(target, [x, y], clone_mouse_event(e));
   }
 
   function event_mouseup(e) {
     var x = e[config.axis.x], y = e[config.axis.y];
-    if (config.combo.enable) do_combo_up(x, y);
     lock.mouseDown = false;
+    if (config.combo.enable) do_combo_up(x, y);
+    if (config.gesture.enable) do_gesture_break(x, y);
     state.hold = null;
     if (callback.mouseup) callback.mouseup(target, [x, y], clone_mouse_event(e));
   }
@@ -190,6 +281,35 @@ function PetalInteraction(callback) {
     if (callback.mouseenter) callback.mouseenter(target, [x, y], clone_mouse_event(e));
   }
 
+  return {
+    config: function () {
+      return config;
+    },
+    bind: function (element) {
+      target = element;
+      interaction_init();
+      element.addEventListener('mousedown', event_mousedown);
+      element.addEventListener('mousemove', event_mousemove);
+      element.addEventListener('mouseup', event_mouseup);
+      element.addEventListener('mouseout', event_mouseout);
+      element.addEventListener('mouseenter', event_mouseenter);
+    },
+    unbind: function () {
+      target.removeEventListener('mousedown', event_mousedown);
+      target.removeEventListener('mousemove', event_mousemove);
+      target.removeEventListener('mouseup', event_mouseup);
+      target.removeEventListener('mouseout', event_mouseout);
+      target.removeEventListener('mouseenter', event_mouseenter);
+      interaction_init();
+      target = null;
+    }
+  };
+}
+
+function PetalMobileInteraction() {
+
+  var target = null;
+
   var _event_touch_map_mouse = {
     touchstart: 'mousedown',
     touchmove:  'mousemove',
@@ -215,32 +335,58 @@ function PetalInteraction(callback) {
   }
 
   return {
+    bind: function (element) {
+      target = element;
+      element.addEventListener('touchstart', event_touch_to_mouse);
+      element.addEventListener('touchmove', event_touch_to_mouse);
+      element.addEventListener('touchend', event_touch_to_mouse);
+    },
+    unbind: function () {
+      target.removeEventListener('touchstart', event_touch_to_mouse);
+      target.removeEventListener('touchmove', event_touch_to_mouse);
+      target.removeEventListener('touchend', event_touch_to_mouse);
+      target = null;
+    }
+  };
+}
+
+function PetalGesture(callback) {
+  var config = {
+    enable: true,
+    mode: 'relative' /* absolute / relative */,
+    timeout: 300     /* ms, reset to record gesture */,
+    absolute: {
+      resolution: 20 /* px, split into n*n boxes */
+    },
+    relative: {
+      resolution: 20 /* px, distance to mark a point */
+    }
+  };
+
+  var target = null;
+
+  var state = {}, lock = {};
+  if (!callback) callback = {};
+
+  function gesture_init() {
+    state.positions = [];
+
+    lock.checkGesture = null;
+  }
+
+  function check_gesture() {
+    if (callback.mousegesture) mousegesture(target, state.positions);
+  }
+
+  return {
     config: function () {
       return config;
     },
     bind: function (element) {
       target = element;
-      interaction_init();
-      element.addEventListener('mousedown', event_mousedown);
-      element.addEventListener('mousemove', event_mousemove);
-      element.addEventListener('mouseup', event_mouseup);
-      element.addEventListener('mouseout', event_mouseout);
-      element.addEventListener('mouseenter', event_mouseenter);
-      element.addEventListener('touchstart', event_touch_to_mouse);
-      element.addEventListener('touchmove', event_touch_to_mouse);
-      element.addEventListener('touchend', event_touch_to_mouse);
     },
-    unbind: function (element) {
-      element.removeEventListener('mousedown', event_mousedown);
-      element.removeEventListener('mousemove', event_mousemove);
-      element.removeEventListener('mouseup', event_mouseup);
-      element.removeEventListener('mouseout', event_mouseout);
-      element.removeEventListener('mouseenter', event_mouseenter);
-      element.removeEventListener('touchstart', event_touch_to_mouse);
-      element.removeEventListener('touchmove', event_touch_to_mouse);
-      element.removeEventListener('touchend', event_touch_to_mouse);
-      interaction_init();
+    unbind: function () {
       target = null;
-    }
-  };
+    },
+  }
 }

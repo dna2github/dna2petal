@@ -1,11 +1,12 @@
 Visualization Module
 
-Module
+PetalModule
 - dynamically load javascript file
 
-Interaction
-- unify mobile touch and computer mouse event
-- simulate event: combo click and mouse hold
+PetalInteraction
+- unify mobile touch and computer mouse event (PetalMobileInteraction)
+- simulate event: combo click, mouse hold, and mouse gesture
 - PetalInteraction(callback) =>
-    callback.comboclick => function
-    callback.mousehold  => function
+    callback.comboclick   => function
+    callback.mousehold    => function
+    callback.mousegesture => function

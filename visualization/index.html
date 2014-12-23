@@ -4,10 +4,14 @@
 <div id="test" style="width:100%;height:100%;background-color:yellow;"></div>
 <script type="text/javascript" src="modules.js"></script>
 <script type="text/javascript">
-var test = document.querySelector('#test');
-var modules = PetalModule();
-modules.load('interactions.js', false, function () {
-  var interactions = PetalInteraction({
+var div_test = document.querySelector('#test');
+var module = PetalModule();
+module.load('interactions.js', false, function () {
+  var mobiletouch = PetalMobileInteraction();
+  var interaction = PetalInteraction({
+    mousegesture: function(target, pos) {
+      console.log('[MouseGesture]');
+    },
     mousehold: function(target, pos) {
       console.log('[MouseHold]');
     },
@@ -15,7 +19,11 @@ modules.load('interactions.js', false, function () {
       console.log('[MouseCombo] ' + pos.length);
     }
   });
-  interactions.bind(test);
+  mobiletouch.bind(div_test);
+  interaction.bind(div_test);
+  // to disable mouse gesture, use interaction.config().gesture.enable = false;
+  // to disable mouse hold,    use interaction.config().hold.enable = false;
+  // to disable combo click,   use interaction.config().combo.enable = false;
 });
 </script>
 </body>
