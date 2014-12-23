@@ -4,6 +4,22 @@ Version 0.1.0
 
 A JavaScript framework for web development
 
+## Visualization
+
+`PetalModule` A function to load javascript file dynamically in DOM.
+
+`PetalInteraction` A function to wrap mouse events.
+
+- `comboclick` click for N times ( N > 2 )
+- `mousehold`  hold for N ms
+- `mousegesture` record mouse move trace
+
+`PetalMobileInteraction` A function to wrap touch events, mapping them to mouse events.
+
+- touchstart ==> mousedown
+- touchmove  ==> mousemove
+- touchend   ==> mouseup
+
 ## State Machine
 
 `$petal.state.PetalMachine` A class to define workflow in a state machine.
