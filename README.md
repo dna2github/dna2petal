@@ -12,6 +12,7 @@ A JavaScript framework for web development
 
 - `comboclick` click for N times ( N > 2 )
 - `mousehold`  hold for N ms
+- `mouseframe` select a frame by drag-n-drop
 - `mousegesture` record mouse move trace
 
 `PetalMobileInteraction` A function to wrap touch events, mapping them to mouse events.

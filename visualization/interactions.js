@@ -2,11 +2,15 @@
  * @auther: Seven Lju
  * @date:   2014-12-22
  * PetalInteraction
- *   callback : mouse event callback, e.g. {mousemove: function (target, positions, extra) { ... }}
- *              mosueevent = click, dblclick, comboclick, mousemove, mousedown, mouseup, mousehold, mousegesture
- *              positions = [x, y] or [x, y, t] or [[x1, y1], [x2, y2], ...] or
- *                          [[x1, y1, t1], [x2, y2, t2], ...] or
- *                          [[[x1, y1, t1], [x2, y2, t2], ...], [[x1, y1, t1], ...], ...]
+ *   callback : mouse event callback, e.g.
+ *     {mousemove: function (target, positions, extra) { ... }}
+ *      mosueevent = click, dblclick, comboclick,
+ *                   mousemove, mousedown, mouseup,
+ *                   mousehold, mouseframe, mousegesture
+ *      positions = [x, y] or [x, y, t] or [[x1, y1], [x2, y2], ...] or
+ *                  [[x1, y1, t1], [x2, y2, t2], ...] or
+ *                  [[[x1, y1, t1], [x2, y2, t2], ...],
+                     [[x1, y1, t1], ...], ...]
  *
  * PetalMobileInteraction
  */
@@ -17,20 +21,28 @@ function PetalInteraction(callback) {
       x: 'clientX',
       y: 'clientY'
     },
-    hold: {
+    hold: { /* hold cursor in a place for some time */
       enable: true,
       last: 1000        /* ms */,
       tolerance: 5      /* px */
     },
-    combo: {
+    combo: { /* click for N times (N > 2) */
       enable: true,
       holdable: false   /* hold for seconds and combo */,
       timingable: false /* count time for combo interval */,
       tolerance: -1     /* px, combo click (x,y) diff */,
       timeout: 200      /* ms, timeout to reset counting */
     },
-    gesture: {
+    frame: { /* drag-n-drop to select an area of frame (rectangle) */
       enable: true,
+      minArea: 50       /* px, the minimum area that a frame will be */,
+      moving: false     /* true: monitor mouse move,
+                                 if (x,y) changes then triggered;
+                           false:
+                                 if mouse up by distance then triggered*/
+    },
+    gesture: { /* customized gesture recorder */
+      enable: false,
       mode: 'relative'  /* absolute / relative */,
       timeout: 500      /* ms, timeout to complete gesture */,
       absolute: {
@@ -51,6 +63,7 @@ function PetalInteraction(callback) {
     state.hold = null;
     state.combo = null;
     state.gesture = null;
+    state.frame = null;
 
     if (lock.checkHold !== null) clearTimeout(lock.checkHold);
     if (lock.checkCombo !== null) clearTimeout(lock.checkCombo);
@@ -173,6 +186,33 @@ function PetalInteraction(callback) {
     lock.checkHold = setTimeout(check_hold, config.hold.last);
   }
 
+  function do_frame_down(x, y) {
+    if (!state.frame) state.frame = {};
+    state.frame.start = true;
+    state.frame.x = x;
+    state.frame.y = y;
+  }
+
+  function do_frame(x, y) {
+    if (!state.frame.start) return;
+    var dx, dy;
+    dx = x - state.frame.x;
+    dy = y - state.frame.y;
+    if (Math.abs(dx*dy) >= config.frame.minArea) {
+      if (callback.mouseframe) {
+        callback.mouseframe(
+          target,
+          [ [state.frame.x, state.frame.y], [x, y] ]
+        );
+      }
+    }
+  }
+
+  function do_frame_up(x, y) {
+    do_frame(x, y);
+    state.frame = null;
+  }
+
   function do_gesture_start(x, y) {
     if (lock.checkGesture !== null) clearTimeout(lock.checkGesture);
     if (!state.gesture) state.gesture = {};
@@ -235,6 +275,7 @@ function PetalInteraction(callback) {
     lock.mouseDown = true;
     if (config.hold.enable) do_hold(x, y, false);
     if (config.combo.enable) do_combo_down(x, y);
+    if (config.frame.enable) do_frame_down(x, y);
     if (config.gesture.enable) do_gesture_start(x, y);
     if (callback.mousedown) callback.mousedown(target, [x, y], clone_mouse_event(e));
   }
@@ -242,6 +283,7 @@ function PetalInteraction(callback) {
   function event_mousemove(e) {
     var x = e[config.axis.x], y = e[config.axis.y];
     if (config.hold.enable) do_hold(x, y, true);
+    if (config.frame.enable && config.frame.moving) do_frame(x, y);
     if (config.gesture.enable) do_gesture_move(x, y);
     if (callback.mousemove) callback.mousemove(target, [x, y], clone_mouse_event(e));
   }
@@ -250,6 +292,7 @@ function PetalInteraction(callback) {
     var x = e[config.axis.x], y = e[config.axis.y];
     lock.mouseDown = false;
     if (config.combo.enable) do_combo_up(x, y);
+    if (config.frame.enable) do_frame_up(x, y);
     if (config.gesture.enable) do_gesture_break(x, y);
     state.hold = null;
     if (callback.mouseup) callback.mouseup(target, [x, y], clone_mouse_event(e));

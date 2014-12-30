@@ -5,8 +5,13 @@ PetalModule
 
 PetalInteraction
 - unify mobile touch and computer mouse event (PetalMobileInteraction)
-- simulate event: combo click, mouse hold, and mouse gesture
+- simulate event:
+    combo click,
+    mouse holding,
+    mouse selecting frame,
+and mouse gesture
 - PetalInteraction(callback) =>
     callback.comboclick   => function
     callback.mousehold    => function
+    callback.mouseframe   => function
     callback.mousegesture => function
