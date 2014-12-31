@@ -13,9 +13,9 @@ module.load('interactions.js', false, function () {
   var mobiletouch = PetalMobileInteraction({
     touchpinch: function(target, pos) {
       console.log('[TouchPicnh]', pos);
-      var str = '[Pinch] ';
+      var str = '[Pinch]<br/>';
       for (var i = 0, n = pos.length; i < n; i++) {
-        str += '('+pos[i][0][0]+','+pos[i][0][1]+') => ('+pos[i][1][0]+','+pos[i][1][1]+') &gt;';
+        str += '('+pos[i][0][0]+','+pos[i][0][1]+') => ('+pos[i][1][0]+','+pos[i][1][1]+')<br/>';
       }
       // it is a bad way to change context via innerHTML,
       // however it is just used for testing

@@ -361,11 +361,8 @@ function PetalMobileInteraction(callback) {
       y: 'clientY'
     },
     pinch: { /* experimental feature, support fingers pinch
-                FIXME: 1) if 5 fingers move on display and one
-                          out of target component, the event
-                          will be never triggered again.
-                       2) if touch pinch triggered, mouse down
-                          and mouse up will triggered too*/
+                FIXME: if touch pinch triggered, mouse down
+                       and mouse up will triggered too*/
       enable: false,
       moving: false     /* monitor finger moving on display */,
       tolerance: 10     /* px, finger moving > N px, event triggered */
@@ -400,8 +397,7 @@ function PetalMobileInteraction(callback) {
   }
 
   function do_pinch_down(e) {
-    if (!state.pinch) state.pinch = {count: 0, points: null};
-    state.pinch.count ++;
+    if (!state.pinch) state.pinch = {points: null};
   }
 
   function do_pinch(e) {
@@ -437,13 +433,10 @@ function PetalMobileInteraction(callback) {
   }
 
   function do_pinch_up(e) {
-    state.pinch.count --;
-    if (state.pinch.points && state.pinch.count === 0) {
+    if (state.pinch.points) {
       check_pinch();
       state.pinch = null;
-      return true;
     }
-    return false;
   }
 
   var _event_touch_map_mouse = {
@@ -469,7 +462,8 @@ function PetalMobileInteraction(callback) {
           do_pinch_down(e);
           break;
         case 'touchend':
-          if (do_pinch_up(e)) return;
+          do_pinch_up(e);
+          // next, be aware of touchend => mouseup
           break;
         }
       }
