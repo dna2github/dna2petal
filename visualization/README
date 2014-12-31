@@ -15,3 +15,13 @@ and mouse gesture
     callback.mousehold    => function
     callback.mouseframe   => function
     callback.mousegesture => function
+
+PetalMobileInteraction
+- map mobile touch to computer mouse event
+    touchstart => mousedown
+    touchmove  => mousemove
+    touchend   => mouseup
+- simulate event:
+    touch pinch
+- PetalMobileInteraction(callback) =>
+    callback.touchpinch   => function

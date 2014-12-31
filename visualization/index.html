@@ -1,5 +1,8 @@
 <html>
-<head><title>Visualization Lab</title></head>
+<head>
+<title>Visualization Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+</head>
 <body>
 <div id="test" style="width:100%;height:100%;background-color:yellow;"></div>
 <script type="text/javascript" src="modules.js"></script>
@@ -7,24 +10,41 @@
 var div_test = document.querySelector('#test');
 var module = PetalModule();
 module.load('interactions.js', false, function () {
-  var mobiletouch = PetalMobileInteraction();
+  var mobiletouch = PetalMobileInteraction({
+    touchpinch: function(target, pos) {
+      console.log('[TouchPicnh]', pos);
+      var str = '[Pinch] ';
+      for (var i = 0, n = pos.length; i < n; i++) {
+        str += '('+pos[i][0][0]+','+pos[i][0][1]+') => ('+pos[i][1][0]+','+pos[i][1][1]+') &gt;';
+      }
+      // it is a bad way to change context via innerHTML,
+      // however it is just used for testing
+      div_test.innerHTML = str;
+    }
+  });
   var interaction = PetalInteraction({
     mousegesture: function(target, pos) {
-      console.log('[MouseGesture]');
+      console.log('[MouseGesture] ', pos);
+      div_test.innerHTML += '[Gesture] &gt;';
     },
     mousehold: function(target, pos) {
-      console.log('[MouseHold]');
+      console.log('[MouseHold]', pos);
+      div_test.innerHTML += '[Hold] &gt;';
     },
     mouseframe: function(target, pos) {
-      console.log('[MouseFrame]');
+      console.log('[MouseFrame]', pos);
+      div_test.innerHTML += '[Frame] &gt;';
     },
     comboclick: function(target, pos) {
-      console.log('[MouseCombo] ' + pos.length);
+      console.log('[MouseCombo] ', pos.length);
+      div_test.innerHTML += '[Combo] &gt;';
     }
   });
   mobiletouch.bind(div_test);
   interaction.bind(div_test);
-  // to disable mouse gesture, use interaction.config().gesture.enable = false;
+  // to enable  touch pinch,   use mobiletouch.config().pinch.enable = true;
+  // to enable  mouse gesture, use interaction.config().gesture.enable = true;
+  // to disable mouse frame,   use interaction.config().frame.enable = false;
   // to disable mouse hold,    use interaction.config().hold.enable = false;
   // to disable combo click,   use interaction.config().combo.enable = false;
 });

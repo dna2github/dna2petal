@@ -17,6 +17,7 @@ A JavaScript framework for web development
 
 `PetalMobileInteraction` A function to wrap touch events, mapping them to mouse events.
 
+- `touchpinch` pinch with multiple fingers
 - touchstart ==> mousedown
 - touchmove  ==> mousemove
 - touchend   ==> mouseup

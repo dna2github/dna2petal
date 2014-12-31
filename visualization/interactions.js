@@ -10,9 +10,12 @@
  *      positions = [x, y] or [x, y, t] or [[x1, y1], [x2, y2], ...] or
  *                  [[x1, y1, t1], [x2, y2, t2], ...] or
  *                  [[[x1, y1, t1], [x2, y2, t2], ...],
-                     [[x1, y1, t1], ...], ...]
+ *                   [[x1, y1, t1], ...], ...]
  *
  * PetalMobileInteraction
+ *    callback: pinch event, e.g.
+ *      {touchpinch: function (target, positions) { ... }}
+ *       positions = [[[xStart, yStart], [xCurrent, yCurrent]], ...]
  */
 function PetalInteraction(callback) {
 
@@ -35,13 +38,14 @@ function PetalInteraction(callback) {
     },
     frame: { /* drag-n-drop to select an area of frame (rectangle) */
       enable: true,
-      minArea: 50       /* px, the minimum area that a frame will be */,
+      minArea: 50       /* px^2, the minimum area that a frame will be */,
       moving: false     /* true: monitor mouse move,
                                  if (x,y) changes then triggered;
                            false:
                                  if mouse up by distance then triggered*/
     },
-    gesture: { /* customized gesture recorder */
+    gesture: { /* experimental feature, customized gesture recorder
+                  FIXME: it is a little slow on mobile device */
       enable: false,
       mode: 'relative'  /* absolute / relative */,
       timeout: 500      /* ms, timeout to complete gesture */,
@@ -349,9 +353,98 @@ function PetalInteraction(callback) {
   };
 }
 
-function PetalMobileInteraction() {
+function PetalMobileInteraction(callback) {
 
+  var config = {
+    axis: {
+      x: 'clientX',
+      y: 'clientY'
+    },
+    pinch: { /* experimental feature, support fingers pinch
+                FIXME: 1) if 5 fingers move on display and one
+                          out of target component, the event
+                          will be never triggered again.
+                       2) if touch pinch triggered, mouse down
+                          and mouse up will triggered too*/
+      enable: false,
+      moving: false     /* monitor finger moving on display */,
+      tolerance: 10     /* px, finger moving > N px, event triggered */
+    }
+  };
+
+  if (!callback) callback = {};
   var target = null;
+  var state = {};
+
+  function check_distance(x0, y0, x, y, d) {
+    if (d < 0) return false;
+    var dx = x - x0, dy = y - y0;
+    return Math.sqrt(dx*dx+dy*dy) > d;
+  }
+
+  function check_pinch() {
+    var points = state.pinch.points;
+    var doit = false;
+    for(var i = 0, n = points.length; i < n; i++) {
+      if (check_distance(points[i][0][0], points[i][0][1],
+                         points[i][1][0], points[i][1][1],
+                         config.pinch.tolerance)) {
+        doit = true;
+        break;
+      }
+    }
+    if (doit) {
+      callback.touchpinch(target, state.pinch.points);
+    }
+    points = null;
+  }
+
+  function do_pinch_down(e) {
+    if (!state.pinch) state.pinch = {count: 0, points: null};
+    state.pinch.count ++;
+  }
+
+  function do_pinch(e) {
+    var touches = e.changedTouches;
+    var points;
+    var newpinch = false;
+    if (!state.pinch.points) {
+      newpinch = true;
+    } else if (state.pinch.points.length < touches.length) {
+      // 2 fingers to 3 and more ...
+      newpinch = true;
+    }
+    if (newpinch) {
+      var i, n, x, y;
+      points = [];
+      for (i = 0, n = touches.length; i < n; i++) {
+        x = touches[i][config.axis.x];
+        y = touches[i][config.axis.y];
+        points.push([ [x, y], [x, y] ]);
+      }
+      state.pinch.points = points;
+    } else {
+      points = state.pinch.points
+      var i, n, x, y;
+      for (i = 0, n = points.length; i < n; i++) {
+        x = touches[i][config.axis.x];
+        y = touches[i][config.axis.y];
+        points[i][1][0] = x;
+        points[i][1][1] = y;
+      }
+    }
+    points = null;
+  }
+
+  function do_pinch_up(e) {
+    state.pinch.count --;
+    if (state.pinch.points && state.pinch.count === 0) {
+      check_pinch();
+      state.pinch = null;
+      return true;
+    }
+    return false;
+  }
 
   var _event_touch_map_mouse = {
     touchstart: 'mousedown',
@@ -361,12 +454,28 @@ function PetalMobileInteraction() {
   function event_touch_to_mouse(e) {
     e.preventDefault();
     var touches = e.changedTouches;
-    if (touches.length > 1) {
-      // TODO: pinch action
-      return;
+    if (config.pinch.enable) {
+      if (callback.touchpinch) {
+        switch(e.type) {
+        case 'touchmove':
+          if (touches.length <= 1) break;
+          if (!config.pinch.enable) return;
+          if (state.pinch.count <= 1) return;
+          do_pinch(e);
+          if (!config.pinch.moving) return;
+          check_pinch();
+          return;
+        case 'touchstart':
+          do_pinch_down(e);
+          break;
+        case 'touchend':
+          if (do_pinch_up(e)) return;
+          break;
+        }
+      }
     }
-    var touch = touches[0];
     var type = _event_touch_map_mouse[e.type];
+    var touch = touches[0];
     var f = document.createEvent("MouseEvents");
     f.initMouseEvent(type, true, true,
                      target.ownerDocument.defaultView, 0,
@@ -378,6 +487,9 @@ function PetalMobileInteraction() {
   }
 
   return {
+    config: function() {
+      return config;
+    },
     bind: function (element) {
       target = element;
       element.addEventListener('touchstart', event_touch_to_mouse);
