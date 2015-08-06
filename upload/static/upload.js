@@ -1,3 +1,7 @@
+/*
+ * @auther: Seven Lju
+ * @date:   2015-08-06
+ */
 'use strict';
 
 function toByteArray(arr) {

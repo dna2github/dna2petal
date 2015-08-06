@@ -2,7 +2,7 @@
 
 Version 0.1.1
 
-A JavaScript utils for web development
+A set of JavaScript utils for web development
 
 ## Large File Uploader
 

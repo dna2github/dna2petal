@@ -1,3 +1,5 @@
+# @auther: Seven Lju
+# @date:   2015-08-06
 from django.conf.urls import patterns, include, url
 
 from django.contrib import admin
