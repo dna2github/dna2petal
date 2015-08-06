@@ -1,8 +1,59 @@
 # petalJS
 
-Version 0.1.0
+Version 0.1.1
 
-A JavaScript framework for web development
+A JavaScript utils for web development
+
+## Large File Uploader
+
+Apply HTML5 File API to realize a uploader that support large file (tested with GB level file). The implementation is compatible in IE 10+, Chrome, Firefox, Safari and Opera.
+
+## Template
+
+Make coding web site as doing with desktop application.
+
+```html
+<!-- partial.html -->
+<div>
+  Name: <input tag="txt_name" type="text" /><br />
+  <table>
+    <thead><th>A</th><th>B</th></thead>
+    <tbody tag="items">
+      <tr tag="+item">
+        <td tag="txt_a">loading...</td>
+        <td tag="txt_b">loading...</td>
+      </tr>
+    </tbody>
+  </table>
+  <hr />
+  <a tag="]link">X</a><a tag="]link">Y</a><a tag="]link">Z</a>
+</div>
+```
+
+```js
+// index.js
+// @include jQuery
+
+// load template HTML
+$petal.ui.load('partial', 'partial.html', false);
+// create component with the template
+var control = {};
+$petal.ui.create(control, 'partial');
+
+// link the element with tag="txt_name" to an object
+$(control.dom.txt_name).val("hello world");
+// tag="]link" yields an array of elements with name "link"
+$(control.dom.link[0]).click(function () { alert("0"); });
+$(control.dom.link[1]).click(function () { alert("1"); });
+$(control.dom.link[2]).click(function () { alert("2"); });
+// tag="+item" makes a sub template named "item"
+var item = {};
+$petal.ui.createT(item, control.template.item);
+$(item.dom.txt_a).text("hello");
+$(item.dom.txt_b).text("world");
+$(contorl.dom.items).append(item.self);
+$(document.body).append(control.self);
+```
 
 ## Visualization
 
