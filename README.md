@@ -1,12 +1,45 @@
 # petalJS
 
-Version 0.1.1
+Version 0.1.2
 
 A set of JavaScript utils for web development
 
+## Graph with Div
+
+Visualization for graph with `<div>` and customized DOM elements.
+
+In a graph, there will be some links between nodes. It visualize
+`a source node points to a target node` as `a big <div> contains a
+small <div>` (see an example in the sample folder: samples/graph-in-div.html ).
+
+Why not use SVG or Canvas? The anwser is to keep things simple. This
+method does not require complex location (x,y) calculating and just
+shows a graph with boxes.
+
+
+```
+  A -> B, A -> C
+  --------------
+  | A          |
+  | ---------- |
+  | | B      | |
+  | ---------- |
+  | ---------- |
+  | | C      | |
+  | ---------- |
+  --------------
+```
+
 ## Large File Uploader
 
-Apply HTML5 File API to realize a uploader that support large file (tested with GB level file). The implementation is compatible in IE 10+, Chrome, Firefox, Safari and Opera.
+Apply HTML5 File API to realize a uploader that support large file (tested with GB level file).
+The implementation is compatible with a morden browser like IE 10+, Chrome, Firefox, Safari and Opera.
+
+```bash
+python mange.py runserver 127.0.0.1:8080
+```
+
+Then go to browser and type `http://127.0.0.1:8080/static/index.html`
 
 ## Template
 
@@ -56,6 +89,8 @@ $(document.body).append(control.self);
 ```
 
 ## Visualization
+
+mouse hold, combo click, select frame, mouse gesture, touch to mouse
 
 `PetalModule` A function to load javascript file dynamically in DOM.
 
