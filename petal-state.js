@@ -1,3 +1,19 @@
+/*
+  @author: Seven Lju
+  @date: 2014-03-27
+
+  a state machine to make clear workflow.
+  e.g. define active -----> processing
+                 ^              |
+                  \-------------|
+       acitve:     {}.disabled = false
+       processing: {}.disabled = true
+       $(button).click(function () {
+         state(button).set('processing');
+         // do something
+         state(button).transfer('active');
+       });
+ */
 var $petal;
 if($petal == null) $petal = {};
 

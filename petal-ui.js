@@ -1,3 +1,9 @@
+/*
+  @author: Seven Lju
+  @date: 2015-02-18
+
+  a template reader for web application.
+ */
 var $petal;
 if($petal == null) $petal = {};
 

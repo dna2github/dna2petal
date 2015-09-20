@@ -1,3 +1,9 @@
+/*
+  @author: Seven Lju
+  @date: 2014-03-27
+
+  a uri router via url hash for one page web applications
+ */
 var $petal;
 if($petal == null) $petal = {};
 
