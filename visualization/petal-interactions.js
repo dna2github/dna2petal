@@ -198,6 +198,7 @@ function PetalInteraction(callback) {
   }
 
   function do_frame(x, y) {
+    if (!state.frame) return
     if (!state.frame.start) return;
     var dx, dy;
     dx = x - state.frame.x;
