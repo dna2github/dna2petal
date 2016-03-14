@@ -365,8 +365,14 @@ function PetalMobileInteraction(callback) {
                 FIXME: if touch pinch triggered, mouse down
                        and mouse up will triggered too*/
       enable: false,
-      moving: false     /* monitor finger moving on display */,
+      moving: false,    /* monitor finger moving on display */
       tolerance: 10     /* px, finger moving > N px, event triggered */
+    },
+    click: {
+      enable: true,
+      timeout: 150,
+      click: true,
+      dblclick: true
     }
   };
 
@@ -440,6 +446,67 @@ function PetalMobileInteraction(callback) {
     }
   }
 
+  function do_click_down(e) {
+    if (!state.click) {
+      state.click = {
+        count: 0,
+        once: true,
+        checkClick: null
+      };
+    }
+    state.click.once = true;
+    if (state.click.checkClick !== null) clearTimeout(state.click.checkClick);
+    state.click.checkClick = setTimeout(check_mob_click, config.click.timeout);
+  }
+
+  function do_click_up(e) {
+    if (!state.click) return;
+    if (!state.click.once) return;
+    var touch = e.changedTouches[0];
+    state.click.count ++;
+    state.click.touch = {
+      screenX: touch.screenX,
+      screenY: touch.screenY,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      ctrlKey: e.ctrlKey,
+      altKey: e.altKey,
+      shiftKey: e.shfitKey,
+      metaKey: e.metaKey
+    };
+    if (state.click.checkClick !== null) clearTimeout(state.click.checkClick);
+    state.click.checkClick = setTimeout(check_mob_click, config.click.timeout);
+  }
+
+  function check_mob_click() {
+    if (!state.click) return;
+    if (state.click.count === 0) {
+    } else if (state.click.count === 1 && config.click.click) {
+      fire_event('click', state.click.touch);
+    } else if (state.click.count === 2 && config.click.dblclick) {
+      fire_event('dblclick', state.click.touch);
+    } else {
+      // XXX: combo click
+    }
+    state.click.checkClick = null;
+    state.click.count = 0;
+    state.click.once = false;
+    state.click.touch = null;
+  }
+
+  function fire_event(type, mouse_attr) {
+    // mouseAttr = {screenX, screenY, clientX, clientY, ctrlKey, altKey, shiftKey, metaKey}
+    var f = document.createEvent("MouseEvents");
+    f.initMouseEvent(type, true, true,
+                     target.ownerDocument.defaultView, 0,
+                     mouse_attr.screenX, mouse_attr.screenY,
+                     mouse_attr.clientX, mouse_attr.clientY,
+                     mouse_attr.ctrlKey, mouse_attr.altKey,
+                     mouse_attr.shiftKey, mouse_attr.metaKey,
+                     0, null);
+    target.dispatchEvent(f);
+  }
+
   var _event_touch_map_mouse = {
     touchstart: 'mousedown',
     touchmove:  'mousemove',
@@ -469,16 +536,26 @@ function PetalMobileInteraction(callback) {
         }
       }
     }
-    var type = _event_touch_map_mouse[e.type];
-    var touch = touches[0];
-    var f = document.createEvent("MouseEvents");
-    f.initMouseEvent(type, true, true,
-                     target.ownerDocument.defaultView, 0,
-                     touch.screenX, touch.screenY,
-                     touch.clientX, touch.clientY,
-                     e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
-                     0, null);
-    target.dispatchEvent(f);
+    if (config.click.enable) {
+      switch(e.type) {
+        case 'touchstart':
+          do_click_down(e);
+          break;
+        case 'touchend':
+          do_click_up(e);
+          break;
+      }
+    }
+    fire_event(_event_touch_map_mouse[e.type], {
+      screenX: touches[0].screenX,
+      screenY: touches[0].screenY,
+      clientX: touches[0].clientX,
+      clientY: touches[0].clientY,
+      ctrlKey: e.ctrlKey,
+      altKey: e.altKey,
+      shiftKey: e.shfitKey,
+      metaKey: e.metaKey
+    });
   }
 
   return {

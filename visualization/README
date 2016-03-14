@@ -18,9 +18,11 @@ and mouse gesture
 
 PetalMobileInteraction
 - map mobile touch to computer mouse event
-    touchstart => mousedown
-    touchmove  => mousemove
-    touchend   => mouseup
+    touchstart          => mousedown
+    touchmove           => mousemove
+    touchend            => mouseup
+    touchstart+touchend => click
+                     *2 => dblclick
 - simulate event:
     touch pinch
 - PetalMobileInteraction(callback) =>
