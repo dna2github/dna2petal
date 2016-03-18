@@ -1,8 +1,23 @@
 # petalJS
 
-Version 0.1.2
+Version 0.1.3
 
 A set of JavaScript utils for web development
+
+## Event Monitor
+
+Basically to count triggered events.
+
+```js
+$petal.evtmonitor.switchOn()
+```
+
+```js
+function click(evt) {
+  console.log($petal.evtmonitor.count(evt.target, click));
+}
+$('#test').click(click);
+```
 
 ## Graph with Div
 

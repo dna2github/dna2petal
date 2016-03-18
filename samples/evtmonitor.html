@@ -1,0 +1,21 @@
+<html>
+<head>
+<script type="text/javascript" src="../evtmonitor/petal-evtmonitor.js"></script>
+</head>
+<body>
+<button id="t1">A</button>
+<button id="t2">B</button>
+<button id="t3">C</button>
+<script type="text/javascript">
+$petal.evtmonitor.switchOn();
+
+function click(evt) {
+  console.log('click', evt.target.outerText, $petal.evtmonitor.count(evt.target, click));
+}
+
+document.querySelector('#t1').addEventListener('click', click, false);
+document.querySelector('#t2').addEventListener('click', click, false);
+document.querySelector('#t3').addEventListener('click', click, false);
+</script>
+</body>
+</html>
