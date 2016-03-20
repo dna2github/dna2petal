@@ -86,6 +86,14 @@ $petal.evtmonitor = {
     if (!item) return null;
     return item.type;
   },
+  addCleanEventListener: function (target, type, listener, options) {
+    return original_addEventListener.call(
+      target,
+      type,
+      listener,
+      options
+    );
+  },
   switchOn: switch_on,
   switchOff: switch_off
 };
