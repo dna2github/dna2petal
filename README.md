@@ -1,8 +1,16 @@
 # petalJS
 
-Version 0.1.3
+Version 0.1.4
 
 A set of JavaScript utils for web development
+
+## AngularJS 2 with ES5 (JavaScript)
+
+An example to write Angular 2 without TypeScript
+
+- Inject a service to a directive
+- Pass data via element attribute
+- Apply data binding
 
 ## Event Monitor
 

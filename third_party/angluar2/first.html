@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Angular 2 without TypeScript</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.0/es6-shim.min.js"></script>
+<script src="https://npmcdn.com/angular2@2.0.0-beta.12/es6/dev/src/testing/shims_for_IE.js"></script>   
+<script src="https://code.angularjs.org/2.0.0-beta.12/angular2-polyfills.js"></script>
+<script src="https://code.angularjs.org/2.0.0-beta.12/Rx.umd.js"></script>
+<script src="https://code.angularjs.org/2.0.0-beta.12/angular2-all.umd.dev.js"></script>
+</head>
+<body>
+<script>
+(function(app) {
+
+function OutsideService() {}
+OutsideService.prototype = {
+  say: function (word) {return word;}
+};
+
+var shared = {
+  value: 'additional parameter',
+  color: 'yellow'
+};
+
+app.NestComponent =
+  ng.core.Component({
+    providers: [ng.core.ElementRef],
+    selector: '[nestComponent]',
+    inputs: ['nestComponent', 'additionalParameter'],
+    template:
+      '<div>{{color}} - {{additionalParameter.value}}</div>' +
+      '<select><option *ngFor="#item of items" [value]="item.id">{{item.value}}</option></select>'
+  })
+  .Class({
+    constructor: [ng.core.ElementRef, function (ref) {
+      this.data = shared;
+      this.ref = ref;
+      this.color = null;
+      this.items=[{value:'banana', id:1}, {value:'apple', id:2}, {value:'pear', id:3}];
+
+      // watch on nestComponent value e.g. <div [nestComponent]="data.color"></div>
+      Object.defineProperty(this, 'nestComponent', {
+        set: function (val) {
+          this.color = val;
+          this.ref.nativeElement.style.backgroundColor = val;
+        }
+      });
+      this.ref.nativeElement.style.backgroundColor = "yellow";
+    }]
+  });
+
+app.AppComponent =
+  ng.core.Component({
+    selector: 'mainApp',
+    template:
+      '<div>{{label}} <input [(ngModel)]="data.color" /></div>' +
+      '<div [nestComponent]="data.color" [additionalParameter]="data">Loading...</div>',
+    directives: [app.NestComponent],
+    providers: [OutsideService]
+  })
+  .Class({
+    constructor: [OutsideService, function(service) {
+      this.data = shared;
+      this.label = service.say("Color:");
+    }]
+  });
+
+document.addEventListener('DOMContentLoaded', function() {
+  ng.platform.browser.bootstrap(app.AppComponent);
+});
+
+})(window.app || (window.app = {}));
+</script>
+<mainApp>Loading...</mainApp>
+</body>
+</html>
