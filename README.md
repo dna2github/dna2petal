@@ -1,8 +1,20 @@
 # petalJS
 
-Version 0.1.4
+Version 0.1.5
 
 A set of JavaScript utils for web development
+
+## Canvas Hypergraph Visualizer
+
+A basement of canvas hypergraph visualizer.
+
+- node-link style
+- euler diagram for node depth (1 (2 (3)))
+- auto adjust for node position change
+  - node non-overlap check
+  - parent node size
+
+![Codon Example](https://github.com/dna2github/dna2petal/wiki/img/codon_sample_1.png)
 
 ## AngularJS 2 with ES5 (JavaScript)
 

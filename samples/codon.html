@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<body>
+<canvas id="paper" width="640" height="480" style="border: 1px black solid;"></canvas>
+<script src="../codon/petal-codon.js"></script>
+<script>
+var c1 = {code:0, view:[180,80,170,120], name: 'container', children: null},
+    n1 = {code:0, view:[10,10,50,30], name: 'hello'},
+    n2 = {code:0, view:[200,100,50,30], name: 'world', parent: c1},
+    n3 = {code:0, view:[280,150,50,30], name: 'another', parent: c1},
+    e1 = {code:1, view:[0,0,0,0], name:'verb', extra:[1, n1, n2]};
+
+c1.children = [n2, n3];
+
+var objs = [
+  c1, e1, n1, n2, n3
+];
+$codon.Paper(document.getElementById('paper'))
+      .setRef(objs)
+      .strip()
+      .repaint();
+</script>
+</body>
+</html>
