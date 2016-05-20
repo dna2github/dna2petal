@@ -54,7 +54,15 @@ var component = {
       // if in design view, we can see the template as a dom
       // in browser; thus here should not have a break
     default:
-      elements[id] = dom;
+      if (elements[id]) {
+        if (!elements[id].length) {
+          elements[id] = [elements[id], dom];
+        } else {
+          elements[id].push(dom);
+        }
+      } else {
+        elements[id] = dom;
+      }
       component._searchDom(dom, elements, templates);
     }
   },
@@ -81,7 +89,7 @@ var component = {
           </tbody>
         </table>
         <hr />
-        <a tag="]link">X</a><a tag="]link">Y</a><a tag="]link">Z</a>
+        <a tag="link">X</a><a tag="link">Y</a><a tag="link">Z</a>
       </div>
 
     index.js
@@ -96,11 +104,12 @@ var component = {
       $petal.ui.createT(item, control.template.item);
       $(item.dom.txt_a).text("hello");
       $(item.dom.txt_b).text("world");
-      $(contorl.dom.items).append(item.self);
+      $(control.dom.items).append(item.self);
       $(document.body).append(control.self);
   */
-  createT: function (control, template) {
+  createT: function (template, control) {
     if (!template) return null;
+    if (!control) control = {};
     var elements = {}, templates = {};
     var dom = $(template);
     component._searchDom(dom, elements, templates);
@@ -109,20 +118,25 @@ var component = {
     control.template = templates;
     return control;
   },
-  create: function (control, name) {
-    return component.createT(control, component.cache[name]);
+  create: function (name, control) {
+    return component.createT(component.cache[name], control);
   },
   empty: function (id) {
     var i, n, ch;
     ch = component.dom(id).children();
     n = ch.length;
     for (i=0; i<n; i++) {
-      $(ch[i]).detach();
+      $(ch[i]).remove();
     }
   },
-  view: function (id, control) {
-    component.empty(id);
-    component.dom(id).append(control.self);
+  view: function (control, id) {
+    if (id) {
+      component.empty(id);
+      component.dom(id).append(control.self);
+    } else {
+      $(document.body).empty();
+      $(document.body).append(control.self);
+    }
   },
   dom: function (id) {
     return $('#' + id);

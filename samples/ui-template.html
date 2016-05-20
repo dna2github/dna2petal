@@ -1,0 +1,35 @@
+<html>
+<head>
+</head>
+<body>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.12.3.min.js"></script>
+<script type="text/javascript" src="../ui-template/petal-ui.js"></script>
+<script type="text/javascript">
+  $petal.ui.cache['partial'] =
+    '<div>' + 
+    '  Name: <input tag="txt_name" type="text" /><br />' +
+    '  <table>' +
+    '    <thead><th>A</th><th>B</th></thead>' +
+    '    <tbody tag="items">' +
+    '      <tr tag="+item">' +
+    '	<td tag="txt_a">loading...</td>' +
+    '	<td tag="txt_b">loading...</td>' +
+    '      </tr>' +
+    '    </tbody>' +
+    '  </table>' +
+    '  <hr />' +
+    '  <a tag="link">X</a><a tag="link">Y</a><a tag="link">Z</a>' +
+    '</div>';
+  var control = $petal.ui.create('partial');
+  $(control.dom.txt_name).val("hello world");
+  $(control.dom.link[0]).click(function () { console.log("0"); });
+  $(control.dom.link[1]).click(function () { console.log("1"); });
+  $(control.dom.link[2]).click(function () { console.log("2"); });
+  var item = $petal.ui.createT(control.template.item);
+  $(item.dom.txt_a).text("hello");
+  $(item.dom.txt_b).text("world");
+  $(control.dom.items).append(item.self);
+  $petal.ui.view(control);
+</script>
+</body>
+</html>
