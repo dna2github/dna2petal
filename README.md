@@ -94,7 +94,10 @@ Make coding web site as doing with desktop application.
     </tbody>
   </table>
   <hr />
-  <a tag="]link">X</a><a tag="]link">Y</a><a tag="]link">Z</a>
+  <a tag="link">X</a><a tag="link">Y</a><a tag="link">Z</a>
+  <div tag="@nest">
+    <div tag="test"></div>
+  </div>
 </div>
 ```
 
@@ -105,8 +108,7 @@ Make coding web site as doing with desktop application.
 // load template HTML
 $petal.ui.load('partial', 'partial.html', false);
 // create component with the template
-var control = {};
-$petal.ui.create(control, 'partial');
+var control = $petal.ui.create('partial');
 
 // link the element with tag="txt_name" to an object
 $(control.dom.txt_name).val("hello world");
@@ -115,11 +117,11 @@ $(control.dom.link[0]).click(function () { alert("0"); });
 $(control.dom.link[1]).click(function () { alert("1"); });
 $(control.dom.link[2]).click(function () { alert("2"); });
 // tag="+item" makes a sub template named "item"
-var item = {};
-$petal.ui.createT(item, control.template.item);
+var item = $petal.ui.createT(control.template.item);
 $(item.dom.txt_a).text("hello");
 $(item.dom.txt_b).text("world");
 $(contorl.dom.items).append(item.self);
+$(control.dom.nest.dom.test).text('seprate world!');
 $(document.body).append(control.self);
 ```
 

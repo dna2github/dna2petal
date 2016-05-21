@@ -43,6 +43,16 @@ var component = {
       elements[id].push(dom);
       component._searchDom(dom, elements, templates);
       break;
+    case 64: // '@', nest
+      var subelements = {}, subtemplates = {};
+      id = id.substring(1);
+      elements[id] = {
+        self: dom,
+        dom: subelements,
+        template: subtemplates
+      }
+      component._searchDom(dom, subelements, subtemplates);
+      break;
     case 43: // '+', template
       id = id.substring(1);
       if (!component.designView) {
@@ -90,21 +100,23 @@ var component = {
         </table>
         <hr />
         <a tag="link">X</a><a tag="link">Y</a><a tag="link">Z</a>
+        <div tag="@nest">
+          <div tag="test"></div>
+        </div>
       </div>
 
     index.js
       $petal.ui.load('partial', 'partial.html', false);
-      var control = {};
-      $petal.ui.create(control, 'partial');
+      var control = $petal.ui.create('partial');
       $(control.dom.txt_name).val("hello world");
       $(control.dom.link[0]).click(function () { alert("0"); });
       $(control.dom.link[1]).click(function () { alert("1"); });
       $(control.dom.link[2]).click(function () { alert("2"); });
-      var item = {};
-      $petal.ui.createT(item, control.template.item);
+      var item = $petal.ui.createT(control.template.item);
       $(item.dom.txt_a).text("hello");
       $(item.dom.txt_b).text("world");
       $(control.dom.items).append(item.self);
+      $(control.dom.nest.dom.test).text('seprate world!');
       $(document.body).append(control.self);
   */
   createT: function (template, control) {
@@ -112,7 +124,13 @@ var component = {
     if (!control) control = {};
     var elements = {}, templates = {};
     var dom = $(template);
-    component._searchDom(dom, elements, templates);
+    if (dom.length === 1) {
+      component._searchDom(dom, elements, templates);
+    } else {
+      for (var i = 0, n = dom.length; i < n; i++) {
+        component._searchDom($(dom[i]), elements, templates);
+      }
+    }
     control.self = dom;
     control.dom = elements;
     control.template = templates;
