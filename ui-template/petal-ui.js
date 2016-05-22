@@ -126,8 +126,16 @@ var component = {
   createT: function (template, control) {
     if (!template) return null;
     if (!control) control = {};
-    var elements = {}, templates = {};
     var dom = $(template);
+    return component.scan(dom, control);
+  },
+  create: function (name, control) {
+    return component.createT(component.cache[name], control);
+  },
+  scan: function (dom, control) {
+    if (!dom) return null;
+    if (!control) control = {};
+    var elements = {}, templates = {};
     if (dom.length === 1) {
       component._searchDom(dom, elements, templates);
     } else {
@@ -139,9 +147,6 @@ var component = {
     control.dom = elements;
     control.template = templates;
     return control;
-  },
-  create: function (name, control) {
-    return component.createT(component.cache[name], control);
   },
   empty: function (id) {
     var i, n, ch;
