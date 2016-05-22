@@ -57,7 +57,11 @@ var component = {
       id = id.substring(1);
       if (!component.designView) {
         $(dom).removeAttr('tag');
-        templates[id] = $(dom).prop('outerHTML');
+        if (templates[id]) {
+          templates[id] += $(dom).prop('outerHTML');
+        } else {
+          templates[id] = $(dom).prop('outerHTML');
+        }
         $(dom).remove();
         break;
       }
