@@ -1,0 +1,23 @@
+{
+  "name": "scroll-window",
+  "authors": [
+    "Seven Lju <dna2gle@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.5.7",
+    "angular-ui-select": "^0.18.0",
+    "bootstrap": "^3.3.6",
+    "angular-sanitize": "^1.5.7"
+  }
+}

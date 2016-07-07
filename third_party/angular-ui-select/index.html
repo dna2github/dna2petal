@@ -1,0 +1,59 @@
+<html>
+<head>
+  <title>Scroll Window</title>
+  <link rel="stylesheet" href="bower_components/angular-ui-select/dist/select.min.css" />
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body ng-app="app" ng-controller="pageIndex">
+  <div class="well">
+    <p>
+      - scroll-window -<br/>
+      do pagination for ui-select;
+      scroll upwards to load previous page;
+      scroll downwards to load next page.
+    </p>
+    <p>
+      scroll-window: list source<br/>
+      scroll-window-selected: default selected item<br/>
+      scroll-window-size: page size<br/>
+    </p>
+    <p>
+      bower install
+      <open> index.html
+    </p>
+  </div>
+  <div>
+    <ui-select
+            id="test"
+            ng-model="selected"
+            theme="bootstrap"
+            ng-disabled="disabled"
+            remove-selected="false"
+            title="Select an Item">
+        <ui-select-match
+                placeholder="Select an Item">
+            {{$select.selected.name}}
+            ({{$select.selected.id}})
+        </ui-select-match>
+        <ui-select-choices
+                scroll-window="test_list | orderBy:'id'"
+                scroll-window-selected="selected"
+                scroll-window-size=20
+                repeat="one.id as one in $select.items track by one.id">
+            <div ng-bind-html="one.name | highlight: $select.search"></div>
+            <small>
+                id: <span
+                    ng-bind-html="''+one.id | highlight: $select.search"></span><br>
+                name: <span
+                    ng-bind-html="''+one.name | highlight: $select.search"></span>
+            </small>
+        </ui-select-choices>
+    </ui-select>
+  </div>
+
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+<script src="bower_components/angular-ui-select/dist/select.js"></script>
+<script src="index.js"></script>
+</body>
+</html>
