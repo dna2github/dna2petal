@@ -103,5 +103,5 @@
       }
    };
 
-   window.BomUploader = Uploader;
+   window.LargeFileUploader = Uploader;
 })(window, document);
